@@ -1,0 +1,58 @@
+"use strict";
+
+var ssdp = require('node-ssdp').Client;
+var players_found = [];
+var iEast_players;
+
+function init() {
+
+	Homey.log("Starting iEast AudioCast app");
+
+}
+
+module.exports.init = init;
+Homey.manager('settings').set( 'deviceadress', '192.168.2.22' );
+
+var http = require('http');
+var options = {
+	host: Homey.manager('settings').get( 'deviceadress' ),
+	path: '/httpapi.asp?command=getPlayerStatus'
+};
+
+var req = http.get(options, function(res) {
+
+  // Buffer the body entirely for processing as a whole.
+  var bodyChunks = [];
+  res.on('data', function(chunk) {
+    // You can process streamed parts here...
+    bodyChunks.push(chunk);
+  }).on('end', function() {
+    var body = Buffer.concat(bodyChunks);
+    // ...and/or process the entire body here.
+		var PlayerStatus = JSON.parse(body.toString());
+		// var data = JSON.parse(yourString);
+		console.log(PlayerStatus);
+		console.log(PlayerStatus.status);
+//**detect client
+
+		var Client = require('node-ssdp').Client
+	     , client = new Client();
+
+		client.on('response', function inResponse(headers, code, rinfo) {
+		  // console.log('Got a response to an m-search:\n%d\n%s\n%s', code, JSON.stringify(headers, null, '  '), JSON.stringify(rinfo, null, '  '));
+			console.log(JSON.stringify(headers, null, '  '));
+			console.log(JSON.stringify(rinfo, null, '  '));
+			var Playeraddress = JSON.parse(JSON.stringify(rinfo, null, '  '));
+			players_found.push(Playeraddress.address);
+		});
+
+		client.search('urn:schemas-tencent-com:service:QPlay:1');
+		//client.search('ssdp:all');
+		console.log(players_found);
+
+		// And after 10 seconds, you want to stop
+		setTimeout(function () {
+		  client.stop();
+		}, 10000);
+  })
+});

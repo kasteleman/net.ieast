@@ -1,0 +1,7 @@
+{
+  "extends": "athom",
+  "rules": {
+    "no-unneeded-ternary": "off",
+    "radix": "off"
+  }
+}

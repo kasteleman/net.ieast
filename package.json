@@ -1,6 +1,0 @@
-{
-  "name": "iEast AudioCast",
-  "version": "0.0.1",
-  "description": "This app adds support for the following Qubino devices in Homey:",
-  "main": "app.js"
-}

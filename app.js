@@ -5,8 +5,9 @@ const client = new Client();
 const playersfound = [];
 const playerxml = ':49152/description.xml';
 const httpapi = '/httpapi.asp?command=';
-const playerstatus = 'getPlayerStatus';
-const setplayer = 'setPlayerCmd:';
+const apidevicestatus = 'getStatusEx';
+const apiplayerstatus = 'getPlayerStatus';
+const apisetplayer = 'setPlayerCmd:';
 const request = require('request');
 // list of currently configured devices
 const devices = {};
@@ -42,8 +43,7 @@ function getPlayersaddresses() {
 			}
 		}
 		console.log(playersfound);
-		// return playersfound;
-		return callback(null, playersfound);
+		return playersfound;
 	});
 
 	// client.search('urn:schemas-tencent-com:service:QPlay:1');
@@ -80,16 +80,15 @@ function checkdescriptionxml(ip) {
 				},
 			};
 			console.log(result);
-			// return result;
-			return callback(null, result);
+			return result;
 		}
 	});
 }
 
-// Get the player status by httpapi
+// Get the device status by httpapi
 
-function getplayerstatus(ip, devicename) {
-	const url = `http://${ip}${httpapi}${playerstatus}`;
+function getdevicestatus(ip, devicename) {
+	const url = `http://${ip}${httpapi}${apidevicestatus}`;
 	const options = {
 		method: 'GET',
 		uri: url,
@@ -101,10 +100,31 @@ function getplayerstatus(ip, devicename) {
 			return console.log('Error: ', error);
 		}
 		if (!error && response.statusCode === 200) {
-			const status = console.log(JSON.parse(body, null, ''));
-			console.log(status);
-			// return status;
-			return callback(null, status);
+			const devicestatus = console.log(JSON.parse(body, null, ''));
+			console.log(devicestatus);
+			return devicestatus;
+		}
+	});
+}
+
+// Get the player status by httpapi
+
+function getplayerstatus(ip, devicename) {
+	const url = `http://${ip}${httpapi}${apiplayerstatus}`;
+	const options = {
+		method: 'GET',
+		uri: url,
+	};
+	console.log(url);
+	request(options, (error, response, body) => {
+		// Check for error
+		if (error) {
+			return console.log('Error: ', error);
+		}
+		if (!error && response.statusCode === 200) {
+			const playstatus = console.log(JSON.parse(body, null, ''));
+			console.log(playstatus);
+			return playstatus;
 		}
 	});
 }
@@ -112,7 +132,7 @@ function getplayerstatus(ip, devicename) {
 // Send command to the player by httpapi
 
 function setplayercommand(ip, setcommand) {
-	const url = `http://${ip}${httpapi}${setplayer}`;
+	const url = `http://${ip}${httpapi}${apisetplayer}`;
 	const options = {
 		method: 'POST',
 		uri: url,
@@ -126,8 +146,7 @@ function setplayercommand(ip, setcommand) {
 		if (!error && response.statusCode === 200) {
 			const feedback = console.log(JSON.parse(body, null, ''));
 			console.log(feedback);
-			// return feedback;
-			return callback(null, feedback);
+			return feedback;
 		}
 	});
 }
@@ -139,6 +158,7 @@ module.exports.init = (devicesData, callback) => {
 	// playersfound.push('192.168.2.23');
 	const output = playersfound.forEach(checkdescriptionxml);
 	console.log(output);
+	getdevicestatus('192.168.2.22', 'Living Room');
 	getplayerstatus('192.168.2.22', 'Living Room');
 	callback();
 }

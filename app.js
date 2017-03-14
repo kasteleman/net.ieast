@@ -27,7 +27,6 @@ function getPlayersaddresses() {
 	let Playeraddress;
 	let Playerheaders = [];
 	client.on('response', (headers, code, rinfo) => {
-	// client.on('response', function inResponse(headers, code, rinfo) {
 		// console.log(JSON.parse(JSON.stringify(rinfo, null, '  ')));
 		// console.log(JSON.parse(JSON.stringify(headers, null, '  ')));
 		Playeraddress = JSON.parse(JSON.stringify(rinfo, null, '  '));
@@ -43,7 +42,8 @@ function getPlayersaddresses() {
 			}
 		}
 		console.log(playersfound);
-		return playersfound;
+		// return playersfound;
+		return callback(null, playersfound);
 	});
 
 	// client.search('urn:schemas-tencent-com:service:QPlay:1');
@@ -69,11 +69,8 @@ function checkdescriptionxml(ip) {
 		}
 		if (!error && response.statusCode === 200) {
 			// console.log(JSON.stringify(body, null, ''));
-			// const manufacturer = body.substring(body.indexOf('<manufacturer>') + 14, body.indexOf('</manufacturer>'));
-			// console.log(manufacturer);
-			// const friendlyName = body.substring(body.indexOf('<friendlyName>') + 14, body.indexOf('</friendlyName>'));
-			// console.log(friendlyName)
-			// if ()
+			// console.log(body.substring(body.indexOf('<manufacturer>') + 14, body.indexOf('</manufacturer>')));
+			// console.log(body.substring(body.indexOf('<friendlyName>') + 14, body.indexOf('</friendlyName>')));
 			const result = {
 				// Set devicename the friendlyName
 				name: body.substring(body.indexOf('<friendlyName>') + 14, body.indexOf('</friendlyName>')),
@@ -83,12 +80,13 @@ function checkdescriptionxml(ip) {
 				},
 			};
 			console.log(result);
-			return result;
+			// return result;
+			return callback(null, result);
 		}
 	});
 }
 
-// Get the player status
+// Get the player status by httpapi
 
 function getplayerstatus(ip, devicename) {
 	const url = `http://${ip}${httpapi}${playerstatus}`;
@@ -106,11 +104,12 @@ function getplayerstatus(ip, devicename) {
 			const status = console.log(JSON.parse(body, null, ''));
 			console.log(status);
 			// return status;
+			return callback(null, status);
 		}
 	});
 }
 
-// Send command to the player
+// Send command to the player by httpapi
 
 function setplayercommand(ip, setcommand) {
 	const url = `http://${ip}${httpapi}${setplayer}`;
@@ -128,6 +127,7 @@ function setplayercommand(ip, setcommand) {
 			const feedback = console.log(JSON.parse(body, null, ''));
 			console.log(feedback);
 			// return feedback;
+			return callback(null, feedback);
 		}
 	});
 }
@@ -140,4 +140,5 @@ module.exports.init = (devicesData, callback) => {
 	const output = playersfound.forEach(checkdescriptionxml);
 	console.log(output);
 	getplayerstatus('192.168.2.22', 'Living Room');
-};
+	callback();
+}

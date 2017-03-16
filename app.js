@@ -2,7 +2,7 @@
 
 const Client = require('node-ssdp').Client;
 const client = new Client();
-const playersfound = [];
+// const playersfound = [];
 const playerxml = ':49152/description.xml';
 const httpapi = '/httpapi.asp?command=';
 const apidevicestatus = 'getStatusEx';
@@ -25,6 +25,7 @@ const manufacturers = {
 
 // Get IP addresses of potential iEast players
 function getPlayersaddresses() {
+	const playersfound = [];
 	let Playeraddress;
 	let Playerheaders = [];
 	client.on('response', (headers, code, rinfo) => {
@@ -37,7 +38,7 @@ function getPlayersaddresses() {
 			// check if header has description.xml at specific port in header LOCATION
 			if (Playerheaders.LOCATION.indexOf(playerxml) > -1) {
 				// check description.xml Linkplay Technology Inc. or iEast
-				checkdescriptionxml(Playeraddress.address);
+				// checkdescriptionxml(Playeraddress.address);
 				// add address to collection
 				playersfound.push(Playeraddress.address);
 			}
@@ -151,14 +152,50 @@ function setplayercommand(ip, setcommand) {
 	});
 }
 
+// Get url data
+
+function geturldata(urlmethod, url) {
+	const options = {
+		method: urlmethod,
+		uri: url,
+	};
+	console.log(urlmethod);
+	console.log(url);
+	request(options, (error, response, body) => {
+		// Check for error
+		if (error) {
+			return console.log('Error: ', error);
+		}
+		if (!error && response.statusCode === 200) {
+			const devicestatus = console.log(JSON.parse(body, null, ''));
+			console.log(body);
+			return body;
+		}
+	});
+}
+
 module.exports.init = (devicesData, callback) => {
 	console.log('iEast AudioCast app starting');
 	// Get the possible playerdevices ip addresses
-	getPlayersaddresses();
+	// getPlayersaddresses();
 	// playersfound.push('192.168.2.23');
-	const output = playersfound.forEach(checkdescriptionxml);
-	console.log(output);
-	getdevicestatus('192.168.2.22', 'Living Room');
-	getplayerstatus('192.168.2.22', 'Living Room');
-	callback();
+	// const output = playersfound.forEach(checkdescriptionxml);
+	// console.log(output);
+	// getdevicestatus('192.168.2.22', 'Living Room');
+	// getplayerstatus('192.168.2.22', 'Living Room');
+	
+	console.log(getPlayersaddresses());
+	
+	const myStringArray = getPlayersaddresses();
+	const arrayLength = myStringArray.length;
+	for (var i = 0; i < arrayLength; i++) {
+	    console.log(myStringArray[i]);
+	    //Do something
+	}
+	
+	console.log(geturldata(GET, `http://192.168.2.22${playerxml}`));
+	console.log(geturldata(GET, `http://192.168.2.22${httpapi}${apidevicestatus}`));
+	console.log(geturldata(GET, `http://192.168.2.22${httpapi}${apiplayerstatus}`));
+	
+	callback(null, true);
 }

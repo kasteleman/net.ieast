@@ -38,10 +38,11 @@ module.exports.deleted = function (device_data, callback) {
 module.exports.pair = (socket) => {
 
 	socket.on('list_devices', (data, callback) => {
-
-		const founddevices = [];
+		const founddevices = getPlayersaddresses('searchssdp', callback)
+		console.log(founddevices);
+		// const founddevices = [];
 		const tempdevice_data = [];
-		getPlayersaddresses(founddevices, (returnedips) => {
+		/** getPlayersaddresses(founddevices, (returnedips) => {
 			console.log(returnedips);
 			// playersfound = returnedips;
 
@@ -67,13 +68,14 @@ module.exports.pair = (socket) => {
 					console.log(JSON.parse(devicestatus, null, ''));
 					console.log('=======================================');
 					const result = JSON.parse(devicestatus, null, '');
-					tempdevice_data.push({
+					// data found so return result
+					return tempdevice_data.push({
 						name: objectname,
-						data: {
-							manufacturer: objectmanufacturer,
-							hardware: result.hardware,
-							mac: result.MAC,
-							ip: result.apcli0,
+							data: {
+								manufacturer: objectmanufacturer,
+								hardware: result.hardware,
+								mac: result.MAC,
+								ip: result.apcli0,
 						},
 					});
 				});
@@ -85,7 +87,7 @@ module.exports.pair = (socket) => {
 					manufacturer: 'iEast',
 				},
 			});
-		});
+		}); **/
 		console.log(tempdevice_data);
 		const device_data = tempdevice_data;
 		// callback(null, device_data);
@@ -107,29 +109,29 @@ module.exports.pair = (socket) => {
 // these are the methods that respond to get/set calls from Homey
 // for example when a user pressed a button
 module.exports.capabilities = {};
-module.exports.capabilities.onoff = {};
-module.exports.capabilities.onoff.get = function (device_data, callback) {
+module.exports.capabilities.speaker_playing = {};
+module.exports.capabilities.speaker_playing.get = function (device_data, callback) {
 
 	var device = getDeviceByData(device_data);
 	if (device instanceof Error) return callback(device);
 
-	return callback(null, device.state.onoff);
+	return callback(null, device.state.speaker_playing);
 
 };
-module.exports.capabilities.onoff.set = function (device_data, onoff, callback) {
+module.exports.capabilities.speaker_playing.set = function (device_data, speaker_playing, callback) {
 
 	var device = getDeviceByData(device_data);
 	if (device instanceof Error) return callback(device);
 
-	device.state.onoff = onoff;
+	device.state.speaker_playing = false;
 
     // here you would use a wireless technology to actually turn the device on or off
 
     // also emit the new value to realtime
     // this produced Insights logs and triggers Flows
-	self.realtime(device_data, 'onoff', device.state.onoff);
+	self.realtime(device_data, 'speaker_playing', device.state.speaker_playing);
 
-	return callback(null, device.state.onoff);
+	return callback(null, device.state.speaker_playing);
 
 };
 
@@ -146,13 +148,13 @@ function getDeviceByData(device_data) {
 // a helper method to add a device to the devices list
 function initDevice(device_data) {
 	devices[device_data.id] = {};
-	devices[device_data.id].state = { onoff: true };
+	devices[device_data.id].state = { speaker_playing: false };
 	devices[device_data.id].data = device_data;
 }
 
 // Get IP addresses of potential iEast players
-function getPlayersaddresses(playersfound, callback) {
-	// playersfound.push('192.168.2.23');
+function getPlayersaddresses(ssdpfound, callback) {
+	// ssdpfound.push('192.168.2.23');
 	let Playeraddress;
 	let Playerheaders = [];
 	client.on('response', (headers, code, rinfo) => {
@@ -161,13 +163,13 @@ function getPlayersaddresses(playersfound, callback) {
 		Playeraddress = JSON.parse(JSON.stringify(rinfo, null, '  '));
 		Playerheaders = JSON.parse(JSON.stringify(headers, null, '  '));
 		// check if address is already in array and is not []
-		if (playersfound.indexOf(Playeraddress.address) === -1 || playersfound.length === 0) {
+		if (ssdpfound.indexOf(Playeraddress.address) === -1 || ssdpfound.length === 0) {
 			// check if header has description.xml at specific port in header LOCATION
 			if (Playerheaders.LOCATION.indexOf(playerxml) > -1) {
 				// check description.xml Linkplay Technology Inc. or iEast
 				// checkdescriptionxml(Playeraddress.address);
 				// add address to collection
-				playersfound.push(Playeraddress.address);
+				ssdpfound.push(Playeraddress.address);
 			}
 		}
 	});
@@ -177,7 +179,11 @@ function getPlayersaddresses(playersfound, callback) {
 	// And after 10 seconds, you want to stop
 	setTimeout(() => {
 		client.stop();
-		callback(playersfound);
+		if (ssdpfound.length === 0) {
+			console.log('No potential players found');
+			callback();
+		}
+		callback(ssdpfound);
 	}, 10000);
 
 }
@@ -195,7 +201,7 @@ function geturldata(urlmethod, url, callback) {
 		// Check for error
 		if (error) {
 			console.log('Error: ', error);
-			body = null;
+			callback(response);
 		}
 		if (!error && response.statusCode === 200) {
 			// console.log(body);

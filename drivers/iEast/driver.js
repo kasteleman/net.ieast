@@ -38,12 +38,11 @@ module.exports.deleted = function (device_data, callback) {
 module.exports.pair = (socket) => {
 
 	socket.on('list_devices', (data, callback) => {
-		const founddevices = getPlayersaddresses('searchssdp', callback)
-		console.log(founddevices);
-		// const founddevices = [];
+
+		const founddevices = [];
 		const tempdevice_data = [];
-		/** getPlayersaddresses(founddevices, (returnedips) => {
-			console.log(returnedips);
+		getPlayersaddresses(founddevices, (returnedips) => {
+			// console.log(returnedips);
 			// playersfound = returnedips;
 
 			for (let i = 0; i < returnedips.length; i++) {
@@ -67,29 +66,31 @@ module.exports.pair = (socket) => {
 					console.log('=======================================');
 					console.log(JSON.parse(devicestatus, null, ''));
 					console.log('=======================================');
-					const result = JSON.parse(devicestatus, null, '');
-					// data found so return result
-					return tempdevice_data.push({
+
+					tempdevice_data.push({
 						name: objectname,
-							data: {
-								manufacturer: objectmanufacturer,
-								hardware: result.hardware,
-								mac: result.MAC,
-								ip: result.apcli0,
+						data: {
+							manufacturer: objectmanufacturer,
+							hardware: JSON.parse(devicestatus, null, '').hardware,
+							mac: JSON.parse(devicestatus, null, '').MAC,
+							ip: JSON.parse(devicestatus, null, '').apcli0,
 						},
 					});
+					console.log(tempdevice_data);
 				});
 
 			}
-			tempdevice_data.push({
-				name: 'test',
-				data: {
-					manufacturer: 'iEast',
-				},
-			});
-		}); **/
+
+		});
+		tempdevice_data.push({
+			name: 'test',
+			data: {
+				manufacturer: 'iEast',
+			},
+		});
 		console.log(tempdevice_data);
 		const device_data = tempdevice_data;
+
 		// callback(null, device_data);
 
 		// even when we found another device, these can be shown in the front-end
@@ -109,29 +110,29 @@ module.exports.pair = (socket) => {
 // these are the methods that respond to get/set calls from Homey
 // for example when a user pressed a button
 module.exports.capabilities = {};
-module.exports.capabilities.speaker_playing = {};
-module.exports.capabilities.speaker_playing.get = function (device_data, callback) {
+module.exports.capabilities.onoff = {};
+module.exports.capabilities.onoff.get = function (device_data, callback) {
 
 	var device = getDeviceByData(device_data);
 	if (device instanceof Error) return callback(device);
 
-	return callback(null, device.state.speaker_playing);
+	return callback(null, device.state.onoff);
 
 };
-module.exports.capabilities.speaker_playing.set = function (device_data, speaker_playing, callback) {
+module.exports.capabilities.onoff.set = function (device_data, onoff, callback) {
 
 	var device = getDeviceByData(device_data);
 	if (device instanceof Error) return callback(device);
 
-	device.state.speaker_playing = false;
+	device.state.onoff = onoff;
 
     // here you would use a wireless technology to actually turn the device on or off
 
     // also emit the new value to realtime
     // this produced Insights logs and triggers Flows
-	self.realtime(device_data, 'speaker_playing', device.state.speaker_playing);
+	self.realtime(device_data, 'onoff', device.state.onoff);
 
-	return callback(null, device.state.speaker_playing);
+	return callback(null, device.state.onoff);
 
 };
 
@@ -148,13 +149,13 @@ function getDeviceByData(device_data) {
 // a helper method to add a device to the devices list
 function initDevice(device_data) {
 	devices[device_data.id] = {};
-	devices[device_data.id].state = { speaker_playing: false };
+	devices[device_data.id].state = { onoff: true };
 	devices[device_data.id].data = device_data;
 }
 
 // Get IP addresses of potential iEast players
-function getPlayersaddresses(ssdpfound, callback) {
-	// ssdpfound.push('192.168.2.23');
+function getPlayersaddresses(playersfound, callback) {
+	// playersfound.push('192.168.2.23');
 	let Playeraddress;
 	let Playerheaders = [];
 	client.on('response', (headers, code, rinfo) => {
@@ -163,13 +164,13 @@ function getPlayersaddresses(ssdpfound, callback) {
 		Playeraddress = JSON.parse(JSON.stringify(rinfo, null, '  '));
 		Playerheaders = JSON.parse(JSON.stringify(headers, null, '  '));
 		// check if address is already in array and is not []
-		if (ssdpfound.indexOf(Playeraddress.address) === -1 || ssdpfound.length === 0) {
+		if (playersfound.indexOf(Playeraddress.address) === -1 || playersfound.length === 0) {
 			// check if header has description.xml at specific port in header LOCATION
 			if (Playerheaders.LOCATION.indexOf(playerxml) > -1) {
 				// check description.xml Linkplay Technology Inc. or iEast
 				// checkdescriptionxml(Playeraddress.address);
 				// add address to collection
-				ssdpfound.push(Playeraddress.address);
+				playersfound.push(Playeraddress.address);
 			}
 		}
 	});
@@ -179,11 +180,7 @@ function getPlayersaddresses(ssdpfound, callback) {
 	// And after 10 seconds, you want to stop
 	setTimeout(() => {
 		client.stop();
-		if (ssdpfound.length === 0) {
-			console.log('No potential players found');
-			callback();
-		}
-		callback(ssdpfound);
+		callback(playersfound);
 	}, 10000);
 
 }
@@ -201,7 +198,7 @@ function geturldata(urlmethod, url, callback) {
 		// Check for error
 		if (error) {
 			console.log('Error: ', error);
-			callback(response);
+			body = null;
 		}
 		if (!error && response.statusCode === 200) {
 			// console.log(body);

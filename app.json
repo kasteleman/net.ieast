@@ -4,7 +4,7 @@
       "en": "iEast AudioCast"
   },
   "version": "0.0.1",
-  "compatibility": "1.1.9",
+  "compatibility": ">=1.1.9",
   "author": {
       "name": "Martin Brasse",
       "email": "kasteleman@gmail.com"

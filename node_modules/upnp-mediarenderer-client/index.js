@@ -314,46 +314,46 @@ function buildMetadata(metadata) {
     'image': 'object.item.imageItem.photo'
   }
 
-	if(metadata.type) {
-		var klass = et.SubElement(item, 'upnp:class');
-		klass.text = OBJECT_CLASSES[metadata.type];
-	}
+  if(metadata.type) {
+    var klass = et.SubElement(item, 'upnp:class');
+    klass.text = OBJECT_CLASSES[metadata.type];
+  }
 
-	var title = et.SubElement(item, 'dc:title');
-	if(metadata.title) {
-		title.text = metadata.title;
-	}
+  var title = et.SubElement(item, 'dc:title');
+  if(metadata.title) {
+    title.text = metadata.title;
+  }
 
-	var creator = et.SubElement(item, 'dc:creator');
-	if(metadata.creator) {
-		creator.text = metadata.creator;
-	}
+  var creator = et.SubElement(item, 'dc:creator');
+  if(metadata.creator) {
+    creator.text = metadata.creator;
+  }
 
-	var artist = et.SubElement(item, 'upnp:artist');
-	if(metadata.artist) {
-		artist.text = metadata.artist;
-	}
+  var artist = et.SubElement(item, 'upnp:artist');
+  if(metadata.artist) {
+    artist.text = metadata.artist;
+  }
 
-	var album = et.SubElement(item, 'upnp:album');
-	if(metadata.album) {
-		artist.text = metadata.album;
-	}
+  var album = et.SubElement(item, 'upnp:album');
+  if(metadata.album) {
+    artist.text = metadata.album;
+  }
 
-	if(metadata.albumArt) {
-		var albumArt = et.SubElement(item, 'upnp:albumArtUri');
-		albumArt.text = metadata.albumArt;
-	}
+  if(metadata.albumArt) {
+    var albumArt = et.SubElement(item, 'upnp:albumArtUri');
+    albumArt.text = metadata.albumArt;
+  }
 
-	var res = et.SubElement(item, 'res');
-	res.text = metadata.url;
-	if(metadata.url && metadata.protocolInfo) {
-		res.set('protocolInfo', metadata.protocolInfo);
-	}
-	if(metadata.duration){
-		res.set('duration', `${Math.floor(metadata.duration / 3600000)
-			}:${`0${Math.floor((metadata.duration % 3600000) / 60000)}`.slice(-2)
-			}:${`0${Math.round((metadata.duration % 60000) / 1000)}`.slice(-2)}`);
-	}
+  var res = et.SubElement(item, 'res');
+  res.text = metadata.url;
+  if(metadata.url && metadata.protocolInfo) {
+    res.set('protocolInfo', metadata.protocolInfo);
+  }
+  if(metadata.duration){
+    res.set('duration', `${Math.floor(metadata.duration / 3600000)
+      }:${`0${Math.floor((metadata.duration % 3600000) / 60000)}`.slice(-2)
+      }:${`0${Math.round((metadata.duration % 60000) / 1000)}`.slice(-2)}`);
+  }
 
   if(metadata.subtitlesUrl) {
     var captionInfo = et.SubElement(item, 'sec:CaptionInfo');

@@ -97,7 +97,7 @@ DeviceClient.prototype.callAction = function(serviceId, actionName, params, call
 
     var service = self.deviceDescription.services[serviceId];
 
-    // Build SOAP action body
+    // Build SOAP action bodydeviceData
     var envelope = et.Element('s:Envelope');
     envelope.set('xmlns:s', 'http://schemas.xmlsoap.org/soap/envelope/');
     envelope.set('s:encodingStyle', 'http://schemas.xmlsoap.org/soap/encoding/');
@@ -109,7 +109,6 @@ DeviceClient.prototype.callAction = function(serviceId, actionName, params, call
     Object.keys(params).forEach(function(paramName) {
       var tmp = et.SubElement(action, paramName);
       var value = params[paramName];
-      console.log(paramName, value, typeof value === 'object', value.constructor, value.constructor.name === 'Element');
       if(typeof value === 'object' && value.constructor && value.constructor.name === 'Element'){
         return tmp.append(value);
       }
@@ -122,8 +121,6 @@ DeviceClient.prototype.callAction = function(serviceId, actionName, params, call
     var xml = doc.write({
       xml_declaration: true,
     });
-
-    console.log('SENDING', xml);
 
     // Send action request
     var options = parseUrl(service.controlURL);
@@ -321,8 +318,8 @@ DeviceClient.prototype.unsubscribe = function(serviceId, listener) {
     };
 
     var req = http.request(options, function(res) {
-    	// FIXME disabled throwing errors on non 200 response since a different response will also most likely indicate
-	    // that the webhook is not registered anymore
+      // FIXME disabled throwing errors on non 200 response since a different response will also most likely indicate
+      // that the webhook is not registered anymore
       // if(res.statusCode !== 200) {
       //   var err = new Error('UNSUBSCRIBE error');
       //   err.statusCode = res.statusCode;

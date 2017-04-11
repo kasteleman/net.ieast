@@ -29,34 +29,6 @@
 			},
 			"class": "speaker",
 			"capabilities": [ "speaker_playing", "speaker_prev", "speaker_next", "volume_set", "volume_mute" ],
-      "mobile": {
-        "components": [
-          {
-            "id": "icon",
-            "capabilities": []
-          },
-          {
-            "id": "button",
-            "capabilities": [ "speaker_prev", "speaker_playing", "speaker_next" ],
-            "options": {
-              "hideTitle": [ "speaker_prev", "speaker_playing", "speaker_next" ],
-              "toggle": [ "speaker_playing" ],
-              "icons": {
-                "speaker_prev": "drivers/iEast/assets/mobile/prev.svg",
-                "speaker_next": "drivers/iEast/assets/mobile/next.svg",
-                "speaker_playing": {
-                  "true": "drivers/iEast/assets/mobile/pause.svg",
-                  "false": "drivers/iEast/assets/mobile/play.svg"
-                }
-              }
-            }
-          },
-          {
-            "id": "slider",
-            "capabilities": [ "volume_set" ]
-          }
-        ]
-      },
 			"pair": [
 				{
 					"id": "list_devices",
